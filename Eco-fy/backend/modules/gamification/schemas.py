@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 class BadgeBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     name: str
     description: Optional[str] = None
     icon: Optional[str] = None
@@ -28,7 +28,7 @@ class EmployeeBadgeResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 class RewardBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     name: str
     description: Optional[str] = None
     xp_cost: int
@@ -44,7 +44,7 @@ class RewardResponse(RewardBase):
     model_config = {"from_attributes": True}
 
 class ChallengeBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     title: str
     description: Optional[str] = None
     category: str
@@ -76,4 +76,5 @@ class XPTransactionResponse(XPTransactionCreate):
 class LeaderboardEntry(BaseModel):
     rank: int
     employee_id: UUID
+    employee_name: str
     total_xp: int

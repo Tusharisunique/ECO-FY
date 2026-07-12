@@ -84,17 +84,31 @@ class XPRepository:
 
     def get_leaderboard(self, organization_id: UUID, limit: int = 10):
         from modules.organization.dept_employee_models import Employee, Department
+        from modules.auth.models import User
         results = (
             self.db.query(
                 XPTransaction.employee_id,
                 func.sum(XPTransaction.amount).label("total_xp"),
+                User.email,
+                User.first_name,
+                User.last_name,
             )
-            .join(Employee, XPTransaction.employee_id == Employee.id)
-            .join(Department, Employee.department_id == Department.id)
-            .filter(Department.organization_id == organization_id)
-            .group_by(XPTransaction.employee_id)
+            .join(User, XPTransaction.employee_id == User.id)
+            .outerjoin(Employee, XPTransaction.employee_id == Employee.user_id)
+            .outerjoin(Department, Employee.department_id == Department.id)
+            .group_by(XPTransaction.employee_id, User.email, User.first_name, User.last_name)
             .order_by(func.sum(XPTransaction.amount).desc())
             .limit(limit)
             .all()
         )
-        return [{"rank": i + 1, "employee_id": r[0], "total_xp": r[1] or 0} for i, r in enumerate(results)]
+        leaderboard = []
+        for i, r in enumerate(results):
+            name = f"{r.first_name or ''} {r.last_name or ''}".strip() or r.email.split('@')[0]
+            leaderboard.append({
+                "rank": i + 1,
+                "employee_id": str(r[0]),
+                "employee_name": name,
+                "total_xp": r.total_xp or 0
+            })
+        return leaderboard
+

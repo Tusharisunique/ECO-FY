@@ -5,7 +5,7 @@ from typing import Optional
 
 class CarbonTransactionBase(BaseModel):
     employee_id: UUID
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     emission_factor_id: Optional[UUID] = None
     activity_type: str
     description: Optional[str] = None

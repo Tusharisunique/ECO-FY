@@ -10,8 +10,8 @@ class CarbonTransaction(Base):
     __tablename__ = "carbon_transactions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     emission_factor_id = Column(UUID(as_uuid=True), ForeignKey("emission_factors.id"), nullable=True)
     
     activity_type = Column(String, nullable=False)       # e.g. "Business Travel", "Office Energy"
@@ -23,5 +23,5 @@ class CarbonTransaction(Base):
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    employee = relationship("Employee", foreign_keys=[employee_id])
+    employee = relationship("User", foreign_keys=[employee_id])
     emission_factor = relationship("EmissionFactor", foreign_keys=[emission_factor_id])

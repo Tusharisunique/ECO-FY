@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
+from typing import Optional
 from core.database import get_db
 from core.dependencies import get_current_active_user
 from .repository import PolicyRepository, AcknowledgementRepository, AuditRepository, ComplianceIssueRepository
@@ -15,8 +16,11 @@ router = APIRouter()
 
 # --- Policies ---
 @router.get("/policies", response_model=list[PolicyResponse])
-def list_policies(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return PolicyRepository(db).list_by_org(organization_id)
+def list_policies(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if organization_id:
+        return PolicyRepository(db).list_by_org(organization_id)
+    from .models import Policy
+    return db.query(Policy).all()
 
 @router.post("/policies", response_model=PolicyResponse, status_code=201)
 def create_policy(data: PolicyCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -41,8 +45,11 @@ def list_acknowledgements(policy_id: UUID, db: Session = Depends(get_db), _=Depe
 
 # --- Audits ---
 @router.get("/audits", response_model=list[AuditResponse])
-def list_audits(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return AuditRepository(db).list_by_org(organization_id)
+def list_audits(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if organization_id:
+        return AuditRepository(db).list_by_org(organization_id)
+    from .models import Audit
+    return db.query(Audit).all()
 
 @router.post("/audits", response_model=AuditResponse, status_code=201)
 def create_audit(data: AuditCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -58,8 +65,11 @@ def update_audit(audit_id: UUID, data: AuditUpdate, db: Session = Depends(get_db
 
 # --- Compliance Issues ---
 @router.get("/compliance-issues", response_model=list[ComplianceIssueResponse])
-def list_issues(audit_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return ComplianceIssueRepository(db).list_by_audit(audit_id)
+def list_issues(audit_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if audit_id:
+        return ComplianceIssueRepository(db).list_by_audit(audit_id)
+    from .models import ComplianceIssue
+    return db.query(ComplianceIssue).all()
 
 @router.post("/compliance-issues", response_model=ComplianceIssueResponse, status_code=201)
 def create_issue(data: ComplianceIssueCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):

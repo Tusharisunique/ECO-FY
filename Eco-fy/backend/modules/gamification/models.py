@@ -10,7 +10,7 @@ class Badge(Base):
     __tablename__ = "badges"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     icon = Column(String, nullable=True)           # Icon name or URL
@@ -26,11 +26,11 @@ class EmployeeBadge(Base):
     __tablename__ = "employee_badges"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     badge_id = Column(UUID(as_uuid=True), ForeignKey("badges.id", ondelete="CASCADE"), nullable=False)
     awarded_at = Column(DateTime, default=datetime.utcnow)
 
-    employee = relationship("Employee", foreign_keys=[employee_id])
+    employee = relationship("User", foreign_keys=[employee_id])
     badge = relationship("Badge", back_populates="employee_badges")
 
 class Reward(Base):
@@ -38,7 +38,7 @@ class Reward(Base):
     __tablename__ = "rewards"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     xp_cost = Column(Integer, nullable=False)
@@ -51,7 +51,7 @@ class Challenge(Base):
     __tablename__ = "challenges"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)
@@ -67,10 +67,10 @@ class XPTransaction(Base):
     __tablename__ = "xp_transactions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     amount = Column(Integer, nullable=False)           # positive = earned, negative = spent
     reason = Column(String, nullable=False)            # e.g. "CSR Activity", "Badge Unlock"
     reference_id = Column(UUID(as_uuid=True), nullable=True)  # source record id
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    employee = relationship("Employee", foreign_keys=[employee_id])
+    employee = relationship("User", foreign_keys=[employee_id])

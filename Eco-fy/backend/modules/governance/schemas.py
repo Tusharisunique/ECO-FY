@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 class PolicyBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     title: str
     description: Optional[str] = None
     category: str
@@ -31,7 +31,7 @@ class AcknowledgementResponse(AcknowledgementCreate):
     model_config = {"from_attributes": True}
 
 class AuditBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     title: str
     auditor: Optional[str] = None
     status: str = "Scheduled"

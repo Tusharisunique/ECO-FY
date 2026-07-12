@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 class CSRActivityBase(BaseModel):
-    organization_id: UUID
+    organization_id: Optional[UUID] = None
     title: str
     description: Optional[str] = None
     category: str

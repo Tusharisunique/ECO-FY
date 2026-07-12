@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes } from 'react';
+import React from 'react';
+import type { InputHTMLAttributes } from 'react';
 import { cn } from './Button';
 
 export const Input: React.FC<InputHTMLAttributes<HTMLInputElement>> = ({ className, ...props }) => {

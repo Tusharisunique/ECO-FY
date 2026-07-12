@@ -24,4 +24,9 @@ class Settings(BaseSettings):
             auth = self.POSTGRES_USER
         return f"postgresql+psycopg://{auth}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
+    # AI Integration
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    AI_MODEL: str = "openai/gpt-3.5-turbo"
+
 settings = Settings()

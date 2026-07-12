@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
+from typing import Optional
 from core.database import get_db
 from core.dependencies import get_current_active_user
 from .repository import BadgeRepository, RewardRepository, ChallengeRepository, XPRepository
@@ -16,8 +17,11 @@ router = APIRouter()
 
 # --- Badges ---
 @router.get("/badges", response_model=list[BadgeResponse])
-def list_badges(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return BadgeRepository(db).list_by_org(organization_id)
+def list_badges(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if organization_id:
+        return BadgeRepository(db).list_by_org(organization_id)
+    from .models import Badge
+    return db.query(Badge).all()
 
 @router.post("/badges", response_model=BadgeResponse, status_code=201)
 def create_badge(data: BadgeCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -37,8 +41,11 @@ def list_employee_badges(employee_id: UUID, db: Session = Depends(get_db), _=Dep
 
 # --- Rewards ---
 @router.get("/rewards", response_model=list[RewardResponse])
-def list_rewards(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return RewardRepository(db).list_by_org(organization_id)
+def list_rewards(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if organization_id:
+        return RewardRepository(db).list_by_org(organization_id)
+    from .models import Reward
+    return db.query(Reward).all()
 
 @router.post("/rewards", response_model=RewardResponse, status_code=201)
 def create_reward(data: RewardCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -46,8 +53,11 @@ def create_reward(data: RewardCreate, db: Session = Depends(get_db), _=Depends(g
 
 # --- Challenges ---
 @router.get("/challenges", response_model=list[ChallengeResponse])
-def list_challenges(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
-    return ChallengeRepository(db).list_by_org(organization_id)
+def list_challenges(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if organization_id:
+        return ChallengeRepository(db).list_by_org(organization_id)
+    from .models import Challenge
+    return db.query(Challenge).all()
 
 @router.post("/challenges", response_model=ChallengeResponse, status_code=201)
 def create_challenge(data: ChallengeCreate, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -65,5 +75,11 @@ def get_total_xp(employee_id: UUID, db: Session = Depends(get_db), _=Depends(get
 
 # --- Leaderboard ---
 @router.get("/leaderboard", response_model=list[LeaderboardEntry])
-def get_leaderboard(organization_id: UUID, limit: int = 10, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+def get_leaderboard(organization_id: Optional[UUID] = None, limit: int = 10, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+    if not organization_id:
+        from modules.organization.models import Organization
+        org = db.query(Organization).first()
+        if not org:
+            return []
+        organization_id = org.id
     return XPRepository(db).get_leaderboard(organization_id, limit)

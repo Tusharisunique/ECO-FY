@@ -10,7 +10,7 @@ class Policy(Base):
     __tablename__ = "policies"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)        # e.g. Ethics, Environment, HR
@@ -28,7 +28,7 @@ class PolicyAcknowledgement(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     policy_id = Column(UUID(as_uuid=True), ForeignKey("policies.id", ondelete="CASCADE"), nullable=False)
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     acknowledged_at = Column(DateTime, default=datetime.utcnow)
 
     policy = relationship("Policy", back_populates="acknowledgements")
@@ -38,7 +38,7 @@ class Audit(Base):
     __tablename__ = "audits"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     title = Column(String, nullable=False)
     auditor = Column(String, nullable=True)
     status = Column(String, default="Scheduled")     # Scheduled, In Progress, Completed

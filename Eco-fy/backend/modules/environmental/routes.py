@@ -6,6 +6,7 @@ from datetime import datetime
 from core.database import get_db
 from core.dependencies import get_current_active_user
 from .repository import CarbonTransactionRepository, CarbonCalculationService
+from .models import CarbonTransaction
 from .schemas import (
     CarbonTransactionCreate, CarbonTransactionResponse,
     EmissionCalculationRequest, EmissionCalculationResponse
@@ -15,13 +16,18 @@ router = APIRouter()
 
 @router.get("/carbon-transactions", response_model=list[CarbonTransactionResponse])
 def list_transactions(
-    organization_id: UUID,
+    organization_id: Optional[UUID] = None,
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
     db: Session = Depends(get_db),
     _=Depends(get_current_active_user),
 ):
-    return CarbonTransactionRepository(db).list_by_org(organization_id, start_date, end_date)
+    # If organization_id is not provided, we can fetch all or handle appropriately
+    if organization_id:
+        return CarbonTransactionRepository(db).list_by_org(organization_id, start_date, end_date)
+    
+    # For demo purposes, returning all transactions if org_id is not passed
+    return db.query(CarbonTransaction).all()
 
 @router.post("/carbon-transactions", response_model=CarbonTransactionResponse, status_code=201)
 def log_carbon_transaction(
@@ -36,7 +42,32 @@ def log_carbon_transaction(
         if not ef:
             raise HTTPException(status_code=404, detail="Emission factor not found")
         co2e_kg = CarbonCalculationService.calculate_co2e(data.quantity, ef.co2e_per_unit)
-    return repo.create(data, co2e_kg)
+    else:
+        # Fallback calculation for demo if no emission factor is provided
+        if "Scope 1" in data.activity_type:
+            co2e_kg = float(data.quantity) * 2.3
+        elif "Scope 2" in data.activity_type:
+            co2e_kg = float(data.quantity) * 0.8
+        else:
+            co2e_kg = float(data.quantity) * 1.5
+            
+    txn = repo.create(data, co2e_kg)
+    
+    # Award XP for logging carbon emissions
+    if data.employee_id:
+        try:
+            from modules.gamification.repository import XPRepository
+            from modules.gamification.schemas import XPTransactionCreate
+            xp_repo = XPRepository(db)
+            xp_repo.award(XPTransactionCreate(
+                employee_id=data.employee_id,
+                amount=25,
+                reason=f"Logged Carbon Emission: {data.activity_type}"
+            ))
+        except Exception as e:
+            print(f"Failed to award XP: {e}")
+            
+    return txn
 
 @router.get("/carbon-transactions/{txn_id}", response_model=CarbonTransactionResponse)
 def get_transaction(txn_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
@@ -73,9 +104,17 @@ def calculate_emission(
     )
 
 @router.get("/carbon-summary")
-def carbon_summary(organization_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
+def carbon_summary(organization_id: Optional[UUID] = None, db: Session = Depends(get_db), _=Depends(get_current_active_user)):
     repo = CarbonTransactionRepository(db)
-    total_kg = repo.total_co2e_by_org(organization_id)
+    
+    # If no org provided, just return total for all or demo default
+    if organization_id:
+        total_kg = repo.total_co2e_by_org(organization_id)
+    else:
+        # Fallback for demo without org
+        txs = db.query(CarbonTransaction).all()
+        total_kg = sum(tx.co2e_kg for tx in txs if tx.co2e_kg)
+
     return {
         "organization_id": str(organization_id),
         "total_co2e_kg": total_kg,

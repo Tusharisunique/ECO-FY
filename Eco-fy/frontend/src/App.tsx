@@ -1,53 +1,25 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Button } from './components/ui/Button';
-import { Card } from './components/ui/Card';
-
-const Dashboard = () => {
-  return (
-    <div className="flex h-screen bg-canvas">
-      {/* Sidebar Placeholder */}
-      <aside className="w-64 bg-sidebar border-r border-border-color p-6 flex flex-col">
-        <h1 className="text-xl font-bold mb-8">Eco-fy</h1>
-        <nav className="flex flex-col gap-2">
-          <Button variant="ghost" className="justify-start">Dashboard</Button>
-          <Button variant="ghost" className="justify-start text-outline-variant">Environmental</Button>
-          <Button variant="ghost" className="justify-start text-outline-variant">Social</Button>
-          <Button variant="ghost" className="justify-start text-outline-variant">Gamification</Button>
-        </nav>
-      </aside>
-
-      {/* Main Content Placeholder */}
-      <main className="flex-1 p-10 overflow-y-auto">
-        <header className="flex justify-between items-center mb-10">
-          <h2 className="text-3xl font-bold font-sans tracking-tight">Dashboard</h2>
-          <Button>Export Report</Button>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <h3 className="text-sm font-semibold text-outline mb-2 uppercase tracking-wider">Total ESG Score</h3>
-            <p className="text-4xl font-bold">852</p>
-          </Card>
-          <Card>
-            <h3 className="text-sm font-semibold text-outline mb-2 uppercase tracking-wider">Carbon Offset</h3>
-            <p className="text-4xl font-bold">12.4t</p>
-          </Card>
-          <Card>
-            <h3 className="text-sm font-semibold text-outline mb-2 uppercase tracking-wider">Active Goals</h3>
-            <p className="text-4xl font-bold">8</p>
-          </Card>
-        </div>
-      </main>
-    </div>
-  );
-};
+import ProtectedRoute from './modules/auth/ProtectedRoute';
+import LoginPage from './modules/auth/LoginPage';
+import DashboardPage from './modules/dashboard/DashboardPage';
+import EnvironmentalPage from './modules/environmental/EnvironmentalPage';
+import SocialPage from './modules/social/SocialPage';
+import GovernancePage from './modules/governance/GovernancePage';
+import GamificationPage from './modules/gamification/GamificationPage';
+import AnalyticsPage from './modules/analytics/AnalyticsPage';
 
 function App() {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/environmental" element={<ProtectedRoute><EnvironmentalPage /></ProtectedRoute>} />
+      <Route path="/social" element={<ProtectedRoute><SocialPage /></ProtectedRoute>} />
+      <Route path="/governance" element={<ProtectedRoute><GovernancePage /></ProtectedRoute>} />
+      <Route path="/gamification" element={<ProtectedRoute><GamificationPage /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

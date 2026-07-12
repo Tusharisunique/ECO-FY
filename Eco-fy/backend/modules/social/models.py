@@ -10,7 +10,7 @@ class CSRActivity(Base):
     __tablename__ = "csr_activities"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=False)  # e.g. Volunteering, Donation, Awareness
@@ -28,7 +28,7 @@ class EmployeeParticipation(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     csr_activity_id = Column(UUID(as_uuid=True), ForeignKey("csr_activities.id", ondelete="CASCADE"), nullable=False)
-    employee_id = Column(UUID(as_uuid=True), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     hours_contributed = Column(Float, default=0.0)
     notes = Column(Text, nullable=True)
     status = Column(String, default="Pending")  # Pending, Approved, Rejected
@@ -38,4 +38,3 @@ class EmployeeParticipation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     csr_activity = relationship("CSRActivity", back_populates="participations")
-    employee = relationship("Employee", foreign_keys=[employee_id])
