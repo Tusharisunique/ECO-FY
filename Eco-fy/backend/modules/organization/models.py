@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from core.database import Base
@@ -10,28 +10,9 @@ class Organization(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False, unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    departments = relationship("Department", back_populates="organization")
-
-class Department(Base):
-    __tablename__ = "departments"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"))
-    name = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    organization = relationship("Organization", back_populates="departments")
-    employees = relationship("Employee", back_populates="department")
-
-class Employee(Base):
-    __tablename__ = "employees"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True)
-    department_id = Column(UUID(as_uuid=True), ForeignKey("departments.id"))
-    role = Column(String, default="Employee") # E.g. Employee, Manager, Admin
+    industry = Column(String, nullable=True)
+    country = Column(String, nullable=True)
+    website = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    department = relationship("Department", back_populates="employees")
+    departments = relationship("Department", back_populates="organization", cascade="all, delete-orphan")

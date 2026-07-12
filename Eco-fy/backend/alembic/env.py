@@ -13,6 +13,12 @@ from core.config import settings
 from core.database import Base
 from modules.auth.models import *
 from modules.organization.models import *
+from modules.organization.dept_employee_models import *
+from modules.esg_config.models import *
+from modules.environmental.models import *
+from modules.social.models import *
+from modules.governance.models import *
+from modules.gamification.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

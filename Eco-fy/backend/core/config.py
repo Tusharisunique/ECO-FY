@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     
     # Database
     POSTGRES_SERVER: str = "localhost"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_USER: str = "tusharjoshi"
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "ecofy"
     POSTGRES_PORT: str = "5432"
     
@@ -18,6 +18,10 @@ class Settings(BaseSettings):
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        if self.POSTGRES_PASSWORD:
+            auth = f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+        else:
+            auth = self.POSTGRES_USER
+        return f"postgresql+psycopg://{auth}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 settings = Settings()
